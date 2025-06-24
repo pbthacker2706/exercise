@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Document</title>
+
+  <!-- Boostrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous" />
+
+  <!-- CSS link -->
+  <link rel="stylesheet" href="styles/dashboard.css" />
+</head>
+
+<body>
+  <div class="main_div">
+    <div class="navbar_pattern">
+      <nav class="navbar">
+        <div class="navbar_main">
+          <img src="logo.svg" alt="logo" />
+          <div class="navbar_links">
+            <div>
+              <ul class="navbar_links hide">
+                <li class="navbar_link active"><a href="#">DASHBOARD</a></li>
+                <li class="navbar_link"><a href="#">CONTENT</a></li>
+                <li class="navbar_link"><a href="#">USERS</a></li>
+                <li class="navbar_link"><a href="#">REPORTS</a></li>
+                <li class="navbar_link"><a href="#">ADMIN</a></li>
+              </ul>
+            </div>
+            <div>
+              <ul class="navbar_icons">
+                <li class="rel">
+                  <img src="icons/alerts.svg" id="alerts_icon" />
+                  <div class="top_circle" id="alerts_count">2</div>
+                  <div class="alerts" id="alerts">
+                    <ul class="alerts_list" id="alerts_placeholder">
+                        <!-- Rendring alerts usign JS -->
+                    </ul>
+                    <div class="icons_button">Show All</div>
+                  </div>
+                </li>
+                <li class="rel">
+                  <img src="icons/announcements.svg" id="announcements_icon" />
+                  <div class="top_circle" id="announcements_count">1</div>
+                  <div class="announcements" id="announcements">
+                    <ul class="alerts_list" id="anouncements_placeholder">
+                      <!-- Rendring announcements usign JS -->
+                    </ul>
+                    <div class="announcements_icons_button">
+                      <button>SHOW ALL</button>
+                      <div class="devider"></div>
+                      <button>CREATE NEW</button>
+                    </div>
+                  </div>
+                </li>
+                <li class="user rel">
+                  <img src="icons/account_circle.svg" />
+                  <div class="top_circle_2">T</div>
+                </li>
+                <button class="navbar-toggler" type="button" id="navbarToggle">
+                  <div class="navbar-toggler-icon">
+                    <img src="icons/hamburger-menu.svg" alt="menu" />
+
+                    <div class="navbar_mob" id="navbarMob">
+                      <ul class="navbar_links navbar_links_mob" id="navbarNav">
+                        <li class="navbar_link">
+                          <div class="navbar_link_head">
+                            <a href="#">DASHBOARD</a>
+                          </div>
+                        </li>
+                        <li class="navbar_link">
+                          <div class="navbar_link_head">
+                            <a href="#">CONTENT</a>
+                            <img src="icons/arrow-down.svg" alt="arrow" />
+                          </div>
+                          <div class="navbar_link_body">
+                            COURSE CETALOG
+                          </div>
+                        </li>
+                        <li class="navbar_link">
+                          <div class="navbar_link_head">
+                            <a href="#">USERS</a>
+                            <img src="icons/arrow-down.svg" alt="arrow" />
+                          </div>
+                          <div class="navbar_link_body">
+                            COURSE CETALOG
+                          </div>
+                        </li>
+                        <li class="navbar_link">
+                          <div class="navbar_link_head">
+                            <a href="#">REPORTS</a>
+                            <img src="icons/arrow-down.svg" alt="arrow" />
+                          </div>
+                          <div class="navbar_link_body">
+                            COURSE CETALOG
+                          </div>
+                        </li>
+                        <li class="navbar_link">
+                          <div class="navbar_link_head">
+                            <a href="#">ADMIN</a>
+                            <img src="icons/arrow-down.svg" alt="arrow" />
+                          </div>
+                          <div class="navbar_link_body">
+                            COURSE CETALOG
+                          </div>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </button>
+              </ul>
+
+            </div>
+          </div>
+        </div>
+      </nav>
+    </div>
+
+    <div class="content_div">
+      <div class="content_selecter">
+        <div class="content_option option_active">
+          <img src="icons/courses.svg" alt="checkbox" />
+          <span style="align-self: end">
+            <span class="option_number">4</span> Courses
+          </span>
+        </div>
+        <div class="content_option">
+          <img src="icons/classes.svg" alt="checkbox" />
+          <span style="align-self: end">
+            <span class="option_number">4</span> Classes
+          </span>
+        </div>
+      </div>
+
+      <div class="content_controller">
+        <div class="controller_text">Showing 4 of 4 courses</div>
+        <div class="controller_select_div">
+          <lable class="controller_text">Sort by: </lable>
+          <select class="controller_select" name="sort" id="sort">
+            <option value="Course Name">Course Name</option>
+            <option value="op2">op2</option>
+            <option value="op3">op3</option>
+          </select>
+          <img src="icons/sort.svg" alt="sort" />
+        </div>
+      </div>
+
+      <div class="content" id="content-placeholder"></div>
+
+      <div class="external_link_div">
+        <a href="#" class="external_link">About</a>
+        <div class="devider"></div>
+        <a href="#" class="external_link">Contact Us</a>
+      </div>
+    </div>
+
+    <div class="footer">
+      <img src="icons/logo used in footer.svg" alt="Quantm" class="quantm_icon" />
+      <div class="devider"></div>
+      <span class="footer_text">Copywright © 2020-2021
+        <a href="https://www.zeuslearning.com" class="footer_link" target="_blank">Zeus systems Pvt. Ltd.</a>
+        All rights reserved.</span>
+    </div>
+  </div>
+
+  <!-- Boostarp Javascript -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+    crossorigin="anonymous"></script>
+  <script src="index.js"></script>
+</body>
+
+</html>

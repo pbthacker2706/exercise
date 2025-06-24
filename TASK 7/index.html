@@ -1,0 +1,249 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Responsive Pointer Drag</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body>
+  <script>
+    // Create background div
+    const bg = document.createElement('div');
+    bg.style.position = 'absolute';
+    bg.style.left = '0';
+    bg.style.top = '0';
+    bg.style.width = window.innerWidth + 'px';
+    bg.style.height = window.innerHeight + 'px';
+    bg.style.backgroundColor = 'black'; 
+    bg.style.overflow = 'hidden';
+    document.body.appendChild(bg);
+
+    // Create draggable child div
+    const child = document.createElement('div');
+    const childSize = 50;
+    child.style.width = childSize + 'px';
+    child.style.height = childSize + 'px';
+    child.style.backgroundColor = 'white';
+    child.style.position = 'absolute';
+    child.style.left = '100px';
+    child.style.top = '100px';
+    child.style.touchAction = 'none'; // Allow pointer drag
+    bg.appendChild(child);
+
+    let offsetX = 0, offsetY = 0;
+    let dragging = false;
+
+    // Clamp helper
+    function clamp(val, min, max) {
+      return Math.max(min, Math.min(val, max));
+    }
+
+    // Reposition square to stay inside visible area on resize
+    function adjustChildPosition() {
+      const bgW = window.innerWidth;
+      const bgH = window.innerHeight;
+
+      bg.style.width = bgW + 'px';
+      bg.style.height = bgH + 'px';
+
+      const maxX = bgW - childSize;
+      const maxY = bgH - childSize;
+
+      const currentX = parseInt(child.style.left);
+      const currentY = parseInt(child.style.top);
+
+      const newX = clamp(currentX, 0, maxX);
+      const newY = clamp(currentY, 0, maxY);
+
+      child.style.left = newX + 'px';
+      child.style.top = newY + 'px';
+    }
+
+    child.addEventListener('pointerdown', (e) => {
+      dragging = true;
+      offsetX = e.clientX - child.offsetLeft;
+      offsetY = e.clientY - child.offsetTop;
+      child.setPointerCapture(e.pointerId);
+    });
+
+    child.addEventListener('pointermove', (e) => {
+      if (!dragging) return;
+
+      let x = e.clientX - offsetX;
+      let y = e.clientY - offsetY;
+
+      const maxX = bg.clientWidth - child.offsetWidth;
+      const maxY = bg.clientHeight - child.offsetHeight;
+
+      child.style.left = clamp(x, 0, maxX) + 'px';
+      child.style.top = clamp(y, 0, maxY) + 'px';
+    });
+
+    child.addEventListener('pointerup', () => {
+      dragging = false;
+    });
+
+    child.addEventListener('pointercancel', () => {
+      dragging = false;
+    });
+
+    window.addEventListener('resize', adjustChildPosition);
+  </script>
+</body>
+</html> -->
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Canvas with Draggable Box</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body>
+  <script>
+    class CanvasManager {
+      constructor() {
+        this.canvas = document.createElement('div');
+        this.canvas.style.position = 'absolute';
+        this.canvas.style.left = '0';
+        this.canvas.style.top = '0';
+        this.canvas.style.backgroundColor = 'black';
+        this.canvas.style.overflow = 'hidden';
+        document.body.appendChild(this.canvas);
+
+        this.resize(); // Initial sizing
+        window.addEventListener('resize', () => this.resize());
+      }
+
+      resize() {
+        this.canvas.style.width = window.innerWidth + 'px';
+        this.canvas.style.height = window.innerHeight + 'px';
+      }
+
+      get element() {
+        return this.canvas;
+      }
+
+      get width() {
+        return this.canvas.clientWidth;
+      }
+
+      get height() {
+        return this.canvas.clientHeight;
+      }
+    }
+
+    class DraggableBox {
+      constructor(parent, size = 50, initialX = 100, initialY = 100) {
+        this.box = document.createElement('div');
+        this.size = size;
+        this.parent = parent;
+
+        Object.assign(this.box.style, {
+          width: size + 'px',
+          height: size + 'px',
+          backgroundColor:'white',
+          position: 'absolute',
+          left: initialX + 'px',
+          top: initialY + 'px',
+          touchAction: 'none'
+        });
+
+        this.dragging = false;
+        this.offsetX = 0;
+        this.offsetY = 0;
+
+        parent.appendChild(this.box);
+        this.addEventListeners();
+      }
+
+      addEventListeners() {
+        this.box.addEventListener('pointerdown', (e) => this.onPointerDown(e));
+        this.box.addEventListener('pointermove', (e) => this.onPointerMove(e));
+        this.box.addEventListener('pointerup', () => this.onPointerUp());
+        this.box.addEventListener('pointercancel', () => this.onPointerUp());
+        window.addEventListener('resize', () => this.repositionIfOutOfBounds());
+      }
+
+      onPointerDown(e) {
+        this.dragging = true;
+        this.offsetX = e.clientX - this.box.offsetLeft;
+        this.offsetY = e.clientY - this.box.offsetTop;
+        this.box.setPointerCapture(e.pointerId);
+      }
+
+      onPointerMove(e) {
+        if (!this.dragging) return;
+
+        const maxX = this.parent.clientWidth - this.size;
+        const maxY = this.parent.clientHeight - this.size;
+
+        let newX = e.clientX - this.offsetX;
+        let newY = e.clientY - this.offsetY;
+
+        newX = this.clamp(newX, 0, maxX);
+        newY = this.clamp(newY, 0, maxY);
+
+        this.box.style.left = newX + 'px';
+        this.box.style.top = newY + 'px';
+      }
+
+      onPointerUp() {
+        this.dragging = false;
+      }
+
+      clamp(val, min, max) {
+        return Math.max(min, Math.min(val, max));
+      }
+
+      repositionIfOutOfBounds() {
+        const maxX = this.parent.clientWidth - this.size;
+        const maxY = this.parent.clientHeight - this.size;
+
+        const currentX = parseInt(this.box.style.left);
+        const currentY = parseInt(this.box.style.top);
+
+        const newX = this.clamp(currentX, 0, maxX);
+        const newY = this.clamp(currentY, 0, maxY);
+
+        this.box.style.left = newX + 'px';
+        this.box.style.top = newY + 'px';
+      }
+    }
+
+    // Initialize canvas and draggable box
+    const canvasManager = new CanvasManager();
+    const box = new DraggableBox(canvasManager.element);
+  </script>
+</body>
+</html>

@@ -1,0 +1,88 @@
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            height: 100vh;
+            display: grid;
+            grid-template-columns: 400px 1fr 1fr;
+            grid-template-rows: 120px 1fr 1fr 120px;
+            grid-template-areas: 
+                "header header header"
+                "sidebar content-1 content-1"
+                "sidebar content-2 content-3"
+                "footer footer footer";
+            gap: 3px;
+            
+            padding: 3px;
+        }
+
+        .header {
+            grid-area: header;
+            background: linear-gradient(to right, #6543ff, #765df3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+            
+        }
+
+        .sidebar {
+            grid-area: sidebar;
+            background: linear-gradient(to bottom right, #44cfd4, #2ea9a5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+            
+        }
+
+        .content-1 {
+            grid-area: content-1;
+            background: linear-gradient(to bottom right, #7252eb, #37d3dc);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+           
+        }
+
+        .content-2 {
+            grid-area: content-2;
+            background: linear-gradient(to bottom right, #7252eb, #37d3dc);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+         
+        }
+
+        .content-3 {
+            grid-area: content-3;
+            background: linear-gradient(to bottom right, #7252eb, #37d3dc);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+   
+        }
+
+        .footer {
+            grid-area: footer;
+            background: linear-gradient(to right, #6543ff, #765df3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+          
+        }
