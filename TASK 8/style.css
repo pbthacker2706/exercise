@@ -1,0 +1,67 @@
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden; /* Prevent window scrolling */
+  font-family: sans-serif;
+}
+
+/* 🔵 Header */
+#header-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+  background: #0078d4;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  font-size: 16px;
+  font-weight: bold;
+  z-index: 100;
+}
+
+#selected-cell {
+  font-weight: normal;
+  font-size: 14px;
+  color: #e0e0e0;
+}
+
+/* 🔵 Toolbar below header */
+#toolbar {
+  position: fixed;
+  top: 40px;
+  left: 0;
+  right: 0;
+  height: 30px;
+  background: #f2f2f2;
+  border-bottom: 1px solid #ccc;
+  padding: 5px 10px;
+  font-size: 14px;
+  z-index: 99;
+}
+
+/* 🔵 Canvas below header+toolbar */
+#canvas-wrapper {
+  position: absolute;
+  top: 70px; /* 40 + 30 */
+  bottom: 0;
+  left: 0;
+  right: 0;
+  overflow: hidden;
+}
+
+/* 🔵 Canvas takes full remaining space */
+canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  background: white;
+}

@@ -36,11 +36,11 @@ body .main_div .navbar_pattern .navbar {
   /* Mobile styles */
   /* Mobile styles */
 }
-@media (max-width: 991.98px) {
+/* @media (max-width: 991.98px) {
   body .main_div .navbar_pattern .navbar {
     padding: 6px 24px;
   }
-}
+} */
 @media (max-width: 768px) {
   body .main_div .navbar_pattern .navbar {
     padding: 8px 16px;

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Excel Grid Canvas</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <!-- Header bar -->
+    <div id="header-bar" style="position: sticky">
+      <span id="app-title">Excel</span>
+      <span id="selected-cell">Selected: -</span>
+    </div>
+
+    <!-- Toolbar for stats -->
+    <div id="toolbar">
+      <span id="stats">Count: 0 | Sum: 0 | Avg: 0 | Min: 0 | Max: 0</span>
+    </div>
+
+    <!-- Main canvas -->
+    <div id="canvas-container">
+      <canvas id="excelCanvas"></canvas>
+    </div>
+    <script type="module" src="main.js"></script>
+  </body>
+</html>

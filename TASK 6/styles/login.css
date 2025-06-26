@@ -129,11 +129,7 @@ body .main_div .form_div .radio_div {
   width: 100%;
 }
 @media screen and (max-width: 768px) {
-  body .main_div .form_div .radio_div {
-    gap: 24px;
-    flex-direction: column;
-    align-items: flex-start;
-  }
+  body .main_div .
   body .main_div .form_div .radio_div span {
     width: 100%;
   }
@@ -322,12 +318,7 @@ body .main_div .form_div .checkBox_div .checkbox {
   cursor: pointer;
   transition: all 0.3s ease;
 }
-@media screen and (max-width: 320px) {
-  body .main_div .form_div .checkBox_div .checkbox {
-    width: 18px;
-    height: 18px;
-  }
-}
+
 body .main_div .form_div .checkBox_div .checkbox:checked {
   background-color: #1f7a54;
   border-color: #1f7a54;
