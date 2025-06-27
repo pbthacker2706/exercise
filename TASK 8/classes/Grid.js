@@ -245,25 +245,25 @@ export class Grid {
       const rect = canvas.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
-
+     
       const row = this.selection.activeCell.row;
       const col = this.selection.activeCell.col;
 
-      const cellX = this.headerWidth + col * this.cellWidth - this.scrollX;
-      const cellY = this.headerHeight + row * this.cellHeight - this.scrollY;
+      const cellX = this.headerWidth + col * this.cellWidth - this.scrollX+8;
+      const cellY = this.headerHeight + row * this.cellHeight - this.scrollY + 44;
 
       const input = document.createElement("input");
       input.type = "text";
       input.value = this.data[`${row},${col}`] || "";
       input.style.position = "absolute";
       input.style.left = `${cellX}px`;
-      input.style.top = `${cellY}px`;
-      input.style.width = `${this.cellWidth - 4}px`;
-      input.style.height = `${this.cellHeight - 4}px`;
+input.style.top = `${cellY }px`;
+      input.style.width = `${this.cellWidth }px`;
+      input.style.height = `${this.cellHeight }px`;
       input.style.fontSize = "12px";
       input.style.padding = "2px";
-      input.style.border = "1px solid #0078d4";
-      input.style.zIndex = 200;
+      input.style.border = "1px solid blue";
+      input.style.zIndex = 10;
       input.style.boxSizing = "border-box";
 
       document.body.appendChild(input);
