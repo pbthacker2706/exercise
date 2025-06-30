@@ -10,13 +10,14 @@ export class Grid {
     this.width = width;
     this.height = height;
 
-    this.cellWidth = 100;
-    this.cellHeight = 24;
-    this.headerHeight = 24;
-    this.headerWidth = 50;
-
     this.totalRows = 100000;
     this.totalCols = 500;
+
+    // Use arrays for per-column width and per-row height
+    this.colWidths = Array(this.totalCols).fill(100);
+    this.rowHeights = Array(this.totalRows).fill(24);
+    this.headerHeight = 24;
+    this.headerWidth = 50;
 
     this.scrollX = 0;
     this.scrollY = 0;
@@ -53,17 +54,92 @@ export class Grid {
     const canvas = document.getElementById("excelCanvas");
     let isDragging = false;
     let startCell = null;
+    let resizing = null; // {type: 'col'|'row', index: number, start: number, origSize: number}
 
     canvas.addEventListener("mousedown", (e) => {
       const rect = canvas.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      const col = Math.floor(
-        (x + this.scrollX - this.headerWidth) / this.cellWidth
-      );
-      const row = Math.floor(
-        (y + this.scrollY - this.headerHeight) / this.cellHeight
-      );
+      const x = e.clientX - rect.left + this.scrollX;
+      const y = e.clientY - rect.top + this.scrollY;
+
+      // Column resize detection (on header border)
+      if (y < this.headerHeight) {
+        let colLeft = this.headerWidth;
+        for (let c = 0; c < this.totalCols; c++) {
+          if (Math.abs(x - (colLeft + this.colWidths[c])) < 4) {
+            resizing = { type: 'col', index: c, start: x, origSize: this.colWidths[c] };
+            document.body.style.cursor = 'col-resize';
+            return;
+          }
+          colLeft += this.colWidths[c];
+        }
+      }
+      // Row resize detection (on header border)
+      if (x < this.headerWidth) {
+        let rowTop = this.headerHeight;
+        for (let r = 0; r < this.totalRows; r++) {
+          if (Math.abs(y - (rowTop + this.rowHeights[r])) < 4) {
+            resizing = { type: 'row', index: r, start: y, origSize: this.rowHeights[r] };
+            document.body.style.cursor = 'row-resize';
+            return;
+          }
+          rowTop += this.rowHeights[r];
+        }
+      }
+      // Column header click (select column)
+      if (y < this.headerHeight && x > this.headerWidth) {
+        let colLeft = this.headerWidth;
+        let col = -1;
+        for (let c = 0; c < this.totalCols; c++) {
+          if (x < colLeft + this.colWidths[c]) {
+            col = c;
+            break;
+          }
+          colLeft += this.colWidths[c];
+        }
+        if (col >= 0) {
+          this.selection.activeCell = { row: 0, col };
+          this.selection.anchorCell = { row: this.totalRows - 1, col };
+          this.render();
+          return;
+        }
+      }
+      // Row header click (select row)
+      if (x < this.headerWidth && y > this.headerHeight) {
+        let rowTop = this.headerHeight;
+        let row = -1;
+        for (let r = 0; r < this.totalRows; r++) {
+          if (y < rowTop + this.rowHeights[r]) {
+            row = r;
+            break;
+          }
+          rowTop += this.rowHeights[r];
+        }
+        if (row >= 0) {
+          this.selection.activeCell = { row, col: 0 };
+          this.selection.anchorCell = { row, col: this.totalCols - 1 };
+          this.render();
+          return;
+        }
+      }
+      // Cell selection
+      let colLeft = this.headerWidth;
+      let col = -1;
+      for (let c = 0; c < this.totalCols; c++) {
+        if (x < colLeft + this.colWidths[c]) {
+          col = c;
+          break;
+        }
+        colLeft += this.colWidths[c];
+      }
+      let rowTop = this.headerHeight;
+      let row = -1;
+      for (let r = 0; r < this.totalRows; r++) {
+        if (y < rowTop + this.rowHeights[r]) {
+          row = r;
+          break;
+        }
+        rowTop += this.rowHeights[r];
+      }
       if (row >= 0 && col >= 0) {
         isDragging = true;
         startCell = { row, col };
@@ -73,16 +149,40 @@ export class Grid {
     });
 
     canvas.addEventListener("mousemove", (e) => {
+      if (resizing) {
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left + this.scrollX;
+        const y = e.clientY - rect.top + this.scrollY;
+        if (resizing.type === 'col') {
+          this.colWidths[resizing.index] = Math.max(20, resizing.origSize + (x - resizing.start));
+        } else if (resizing.type === 'row') {
+          this.rowHeights[resizing.index] = Math.max(10, resizing.origSize + (y - resizing.start));
+        }
+        this.render();
+        return;
+      }
       if (!isDragging || !startCell) return;
       const rect = canvas.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      const col = Math.floor(
-        (x + this.scrollX - this.headerWidth) / this.cellWidth
-      );
-      const row = Math.floor(
-        (y + this.scrollY - this.headerHeight) / this.cellHeight
-      );
+      const x = e.clientX - rect.left + this.scrollX;
+      const y = e.clientY - rect.top + this.scrollY;
+      let col = -1;
+      let colLeft = this.headerWidth;
+      for (let c = 0; c < this.totalCols; c++) {
+        if (x < colLeft + this.colWidths[c]) {
+          col = c;
+          break;
+        }
+        colLeft += this.colWidths[c];
+      }
+      let row = -1;
+      let rowTop = this.headerHeight;
+      for (let r = 0; r < this.totalRows; r++) {
+        if (y < rowTop + this.rowHeights[r]) {
+          row = r;
+          break;
+        }
+        rowTop += this.rowHeights[r];
+      }
       if (row >= 0 && col >= 0) {
         this.selection.anchorCell = { ...startCell };
         this.selection.activeCell = { row, col };
@@ -91,6 +191,10 @@ export class Grid {
     });
 
     window.addEventListener("mouseup", () => {
+      if (resizing) {
+        resizing = null;
+        document.body.style.cursor = '';
+      }
       isDragging = false;
       startCell = null;
     });
@@ -164,25 +268,25 @@ export class Grid {
       "selected-cell"
     ).textContent = `Selected: ${this.getColumnName(col)}${row + 1}`;
 
-    const left = col * this.cellWidth;
-    const top = row * this.cellHeight;
+    const left = col * this.colWidths[col];
+    const top = row * this.rowHeights[row];
 
     if (left < this.scrollX) {
       this.scrollX = left;
     } else if (
-      left + this.cellWidth >
+      left + this.colWidths[col] >
       this.scrollX + this.width - this.headerWidth
     ) {
-      this.scrollX = left - (this.width - this.headerWidth - this.cellWidth);
+      this.scrollX = left - (this.width - this.headerWidth - this.colWidths[col]);
     }
 
     if (top < this.scrollY) {
       this.scrollY = top;
     } else if (
-      top + this.cellHeight >
+      top + this.rowHeights[row] >
       this.scrollY + this.height - this.headerHeight
     ) {
-      this.scrollY = top - (this.height - this.headerHeight - this.cellHeight);
+      this.scrollY = top - (this.height - this.headerHeight - this.rowHeights[row]);
     }
 
     this._clampScroll();
@@ -193,25 +297,57 @@ export class Grid {
   _clampScroll() {
     this.scrollX = Math.max(
       0,
-      Math.min(this.scrollX, this.totalCols * this.cellWidth - this.width)
+      Math.min(this.scrollX, this.totalCols * this.colWidths[0] - this.width)
     );
     this.scrollY = Math.max(
       0,
-      Math.min(this.scrollY, this.totalRows * this.cellHeight - this.height)
+      Math.min(this.scrollY, this.totalRows * this.rowHeights[0] - this.height)
     );
   }
 
   getVisibleRange() {
-    const startCol = Math.floor(this.scrollX / this.cellWidth);
-    const endCol = Math.min(
-      this.totalCols,
-      startCol + Math.ceil((this.width - this.headerWidth) / this.cellWidth)
-    );
-    const startRow = Math.floor(this.scrollY / this.cellHeight);
-    const endRow = Math.min(
-      this.totalRows,
-      startRow + Math.ceil((this.height - this.headerHeight) / this.cellHeight)
-    );
+    // Calculate visible columns and rows based on scroll and per-column/row sizes
+    let x = 0, y = 0, startCol = 0, endCol = 0, startRow = 0, endRow = 0;
+    let accX = 0;
+    // Find startCol
+    for (let c = 0; c < this.totalCols; c++) {
+      if (accX + this.colWidths[c] > this.scrollX) {
+        startCol = c;
+        break;
+      }
+      accX += this.colWidths[c];
+    }
+    // Find endCol
+    let visX = accX;
+    for (let c = startCol; c < this.totalCols; c++) {
+      visX += this.colWidths[c];
+      if (visX - this.scrollX > this.width - this.headerWidth) {
+        endCol = c + 1;
+        break;
+      }
+    }
+    if (endCol === 0) endCol = this.totalCols;
+
+    // Find startRow
+    let accY = 0;
+    for (let r = 0; r < this.totalRows; r++) {
+      if (accY + this.rowHeights[r] > this.scrollY) {
+        startRow = r;
+        break;
+      }
+      accY += this.rowHeights[r];
+    }
+    // Find endRow
+    let visY = accY;
+    for (let r = startRow; r < this.totalRows; r++) {
+      visY += this.rowHeights[r];
+      if (visY - this.scrollY > this.height - this.headerHeight) {
+        endRow = r + 1;
+        break;
+      }
+    }
+    if (endRow === 0) endRow = this.totalRows;
+
     return { startRow, endRow, startCol, endCol };
   }
 
@@ -229,22 +365,34 @@ export class Grid {
     this.ctx.textBaseline = "middle";
     this.ctx.textAlign = "center";
 
+    // Calculate x positions for columns
+    let colXs = [];
+    let x = 0;
+    for (let c = 0; c < this.totalCols; c++) {
+      colXs[c] = x;
+      x += this.colWidths[c];
+    }
+    // Calculate y positions for rows
+    let rowYs = [];
+    let y = 0;
+    for (let r = 0; r < this.totalRows; r++) {
+      rowYs[r] = y;
+      y += this.rowHeights[r];
+    }
+
     for (let r = startRow; r < endRow; r++) {
       for (let c = startCol; c < endCol; c++) {
-        const x = c * this.cellWidth;
-        const y = r * this.cellHeight;
-
+        const x = colXs[c];
+        const y = rowYs[r];
         this.ctx.strokeStyle = "#ccc";
-        this.ctx.strokeRect(x, y, this.cellWidth, this.cellHeight);
-
+        this.ctx.strokeRect(x, y, this.colWidths[c], this.rowHeights[r]);
         const value = this.data[`${r},${c}`] || "";
         this.ctx.fillStyle = "#000";
         this.ctx.fillText(
           value,
-          x + this.cellWidth / 2,
-          y + this.cellHeight / 2
+          x + this.colWidths[c] / 2,
+          y + this.rowHeights[r] / 2
         );
-
         // Highlight selection range
         if (this.selection.isCellInRange(r, c)) {
           this.ctx.save();
@@ -253,58 +401,58 @@ export class Grid {
           this.ctx.strokeRect(
             x + 1,
             y + 1,
-            this.cellWidth - 2,
-            this.cellHeight - 2
+            this.colWidths[c] - 2,
+            this.rowHeights[r] - 2
           );
           this.ctx.globalAlpha = 0.1;
           this.ctx.fillStyle = "#3399ff";
           this.ctx.fillRect(
             x + 1,
             y + 1,
-            this.cellWidth - 2,
-            this.cellHeight - 2
+            this.colWidths[c] - 2,
+            this.rowHeights[r] - 2
           );
           this.ctx.globalAlpha = 1.0;
           this.ctx.restore();
         }
-
         if (
           this.selection.activeCell?.row === r &&
           this.selection.activeCell?.col === c
         ) {
           this.ctx.strokeStyle = "#0078d4";
           this.ctx.lineWidth = 2;
-          this.ctx.strokeRect(x, y, this.cellWidth, this.cellHeight);
+          this.ctx.strokeRect(x, y, this.colWidths[c], this.rowHeights[r]);
           this.ctx.lineWidth = 1;
         }
       }
     }
-
     this.ctx.restore();
 
     // Column headers
+    let colX = this.headerWidth - this.scrollX;
     for (let c = startCol; c < endCol; c++) {
-      const x = this.headerWidth + c * this.cellWidth - this.scrollX;
+      const w = this.colWidths[c];
       this.ctx.fillStyle = "#f0f0f0";
-      this.ctx.fillRect(x, 0, this.cellWidth, this.headerHeight);
+      this.ctx.fillRect(colX, 0, w, this.headerHeight);
       this.ctx.strokeStyle = "#ccc";
-      this.ctx.strokeRect(x, 0, this.cellWidth, this.headerHeight);
-
+      this.ctx.strokeRect(colX, 0, w, this.headerHeight);
       const colName = this.getColumnName(c);
       this.ctx.fillStyle = "#000";
-      this.ctx.fillText(colName, x + this.cellWidth / 2, this.headerHeight / 2);
+      this.ctx.fillText(colName, colX + w / 2, this.headerHeight / 2);
+      colX += w;
     }
 
     // Row headers
+    let rowY = this.headerHeight - this.scrollY;
     for (let r = startRow; r < endRow; r++) {
-      const y = this.headerHeight + r * this.cellHeight - this.scrollY;
+      const h = this.rowHeights[r];
       this.ctx.fillStyle = "#f0f0f0";
-      this.ctx.fillRect(0, y, this.headerWidth, this.cellHeight);
+      this.ctx.fillRect(0, rowY, this.headerWidth, h);
       this.ctx.strokeStyle = "#ccc";
-      this.ctx.strokeRect(0, y, this.headerWidth, this.cellHeight);
-
+      this.ctx.strokeRect(0, rowY, this.headerWidth, h);
       this.ctx.fillStyle = "#000";
-      this.ctx.fillText(r + 1, this.headerWidth / 2, y + this.cellHeight / 2);
+      this.ctx.fillText(r + 1, this.headerWidth / 2, rowY + h / 2);
+      rowY += h;
     }
 
     // Corner
@@ -331,9 +479,16 @@ export class Grid {
       const row = this.selection.activeCell.row;
       const col = this.selection.activeCell.col;
 
-      const cellX = this.headerWidth + col * this.cellWidth - this.scrollX;
-      const cellY =
-        this.headerHeight + row * this.cellHeight - this.scrollY + 102;
+      // Calculate left position by summing widths of previous columns
+      let cellX = this.headerWidth;
+      for (let i = 0; i < col; i++) cellX += this.colWidths[i];
+      cellX -= this.scrollX;
+      // Calculate top position by summing heights of previous rows
+      let cellY = this.headerHeight;
+      for (let i = 0; i < row; i++) cellY += this.rowHeights[i];
+      cellY -= this.scrollY;
+      // Add header and toolbar heights (header: 40px, formula bar: 32px, toolbar: 30px)
+      cellY += 40 + 32 + 30;
 
       const input = document.createElement("input");
       input.type = "text";
@@ -341,8 +496,8 @@ export class Grid {
       input.style.position = "absolute";
       input.style.left = `${cellX}px`;
       input.style.top = `${cellY}px`;
-      input.style.width = `${this.cellWidth}px`;
-      input.style.height = `${this.cellHeight}px`;
+      input.style.width = `${this.colWidths[col]}px`;
+      input.style.height = `${this.rowHeights[row]}px`;
       input.style.fontSize = "12px";
       input.style.padding = "2px";
       input.style.border = "1px solid blue";
