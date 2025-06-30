@@ -51,22 +51,48 @@ export class Grid {
 
   _bindClick() {
     const canvas = document.getElementById("excelCanvas");
+    let isDragging = false;
+    let startCell = null;
 
-    canvas.addEventListener("click", (e) => {
+    canvas.addEventListener("mousedown", (e) => {
       const rect = canvas.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
-
       const col = Math.floor(
         (x + this.scrollX - this.headerWidth) / this.cellWidth
       );
       const row = Math.floor(
         (y + this.scrollY - this.headerHeight) / this.cellHeight
       );
-
       if (row >= 0 && col >= 0) {
+        isDragging = true;
+        startCell = { row, col };
+        this.selection.selectCell(row, col);
         this._selectAndFocus(row, col);
       }
+    });
+
+    canvas.addEventListener("mousemove", (e) => {
+      if (!isDragging || !startCell) return;
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const col = Math.floor(
+        (x + this.scrollX - this.headerWidth) / this.cellWidth
+      );
+      const row = Math.floor(
+        (y + this.scrollY - this.headerHeight) / this.cellHeight
+      );
+      if (row >= 0 && col >= 0) {
+        this.selection.anchorCell = { ...startCell };
+        this.selection.activeCell = { row, col };
+        this.render();
+      }
+    });
+
+    window.addEventListener("mouseup", () => {
+      isDragging = false;
+      startCell = null;
     });
   }
 
@@ -74,9 +100,42 @@ export class Grid {
   _bindKeyboard() {
     window.addEventListener("keydown", (e) => {
       if (!this.selection.activeCell) return;
-
       let { row, col } = this.selection.activeCell;
-
+      let isRange = e.shiftKey;
+      // Copy (Ctrl+C)
+      if (e.ctrlKey && e.key.toLowerCase() === 'c') {
+        const range = this.selection.getRange();
+        let text = '';
+        for (let r = range.startRow; r <= range.endRow; r++) {
+          let rowVals = [];
+          for (let c2 = range.startCol; c2 <= range.endCol; c2++) {
+            rowVals.push(this.data[`${r},${c2}`] || '');
+          }
+          text += rowVals.join('\t');
+          if (r < range.endRow) text += '\n';
+        }
+        navigator.clipboard.writeText(text);
+        e.preventDefault();
+        return;
+      }
+      // Paste (Ctrl+V)
+      if (e.ctrlKey && e.key.toLowerCase() === 'v') {
+        navigator.clipboard.readText().then(text => {
+          if (!text) return;
+          const rows = text.split(/\r?\n/);
+          const range = this.selection.getRange();
+          let startRow = range ? range.startRow : row;
+          let startCol = range ? range.startCol : col;
+          for (let r = 0; r < rows.length; r++) {
+            const cells = rows[r].split('\t');
+            for (let c2 = 0; c2 < cells.length; c2++) {
+              this.updateCell(startRow + r, startCol + c2, cells[c2]);
+            }
+          }
+        });
+        e.preventDefault();
+        return;
+      }
       switch (e.key) {
         case "ArrowUp":
           row = Math.max(0, row - 1);
@@ -93,14 +152,14 @@ export class Grid {
         default:
           return;
       }
-
-      this._selectAndFocus(row, col);
+      this.selection.selectCell(row, col, isRange);
+      this._selectAndFocus(row, col, isRange);
     });
   }
 
   // 🔧 New: Scrolls into view and selects
-  _selectAndFocus(row, col) {
-    this.selection.selectCell(row, col);
+  _selectAndFocus(row, col, isRange = false) {
+    this.selection.selectCell(row, col, isRange);
     document.getElementById(
       "selected-cell"
     ).textContent = `Selected: ${this.getColumnName(col)}${row + 1}`;
@@ -186,6 +245,29 @@ export class Grid {
           y + this.cellHeight / 2
         );
 
+        // Highlight selection range
+        if (this.selection.isCellInRange(r, c)) {
+          this.ctx.save();
+          this.ctx.strokeStyle = "#3399ff";
+          this.ctx.lineWidth = 2;
+          this.ctx.strokeRect(
+            x + 1,
+            y + 1,
+            this.cellWidth - 2,
+            this.cellHeight - 2
+          );
+          this.ctx.globalAlpha = 0.1;
+          this.ctx.fillStyle = "#3399ff";
+          this.ctx.fillRect(
+            x + 1,
+            y + 1,
+            this.cellWidth - 2,
+            this.cellHeight - 2
+          );
+          this.ctx.globalAlpha = 1.0;
+          this.ctx.restore();
+        }
+
         if (
           this.selection.activeCell?.row === r &&
           this.selection.activeCell?.col === c
@@ -249,9 +331,9 @@ export class Grid {
       const row = this.selection.activeCell.row;
       const col = this.selection.activeCell.col;
 
-      const cellX = this.headerWidth + col * this.cellWidth - this.scrollX ;
+      const cellX = this.headerWidth + col * this.cellWidth - this.scrollX;
       const cellY =
-        this.headerHeight + row * this.cellHeight - this.scrollY +70;
+        this.headerHeight + row * this.cellHeight - this.scrollY + 102;
 
       const input = document.createElement("input");
       input.type = "text";
