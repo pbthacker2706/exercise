@@ -16,8 +16,8 @@ export class Grid {
     // Use arrays for per-column width and per-row height
     this.colWidths = Array(this.totalCols).fill(100);
     this.rowHeights = Array(this.totalRows).fill(24);
-    this.headerHeight = 24;
-    this.headerWidth = 50;
+    this.headerHeight = 28                                                                                                                                    ;
+    this.headerWidth = 100;
 
     this.scrollX = 0;
     this.scrollY = 0;
@@ -396,7 +396,7 @@ export class Grid {
         // Highlight selection range
         if (this.selection.isCellInRange(r, c)) {
           this.ctx.save();
-          this.ctx.strokeStyle = "#3399ff";
+          this.ctx.strokeStyle = "#137e43";
           this.ctx.lineWidth = 2;
           this.ctx.strokeRect(
             x + 1,
@@ -405,7 +405,7 @@ export class Grid {
             this.rowHeights[r] - 2
           );
           this.ctx.globalAlpha = 0.1;
-          this.ctx.fillStyle = "#3399ff";
+          this.ctx.fillStyle = "white";
           this.ctx.fillRect(
             x + 1,
             y + 1,
@@ -419,9 +419,9 @@ export class Grid {
           this.selection.activeCell?.row === r &&
           this.selection.activeCell?.col === c
         ) {
-          this.ctx.strokeStyle = "#0078d4";
+          this.ctx.strokeStyle = "#137e43";
           this.ctx.lineWidth = 2;
-          this.ctx.strokeRect(x, y, this.colWidths[c], this.rowHeights[r]);
+          // this.ctx.strokeRect(x, y, this.colWidths[c], this.rowHeights[r]);
           this.ctx.lineWidth = 1;
         }
       }
@@ -500,7 +500,7 @@ export class Grid {
       input.style.height = `${this.rowHeights[row]}px`;
       input.style.fontSize = "12px";
       input.style.padding = "2px";
-      input.style.border = "1px solid blue";
+      input.style.border = "1px solid yellow";
       input.style.zIndex = 10;
       input.style.boxSizing = "border-box";
 
